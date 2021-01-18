@@ -3,13 +3,13 @@ import React, { Component } from "react";
 class Index extends Component {
   state = {
     savings:'',
-    savingsSum: 0,
     mySaving: 1000,
     overdraft: '',
     error: '',
     sum: 0,
     overdraftSum: 0,
-    story: [{ item: 0, id: 0 }],
+    savingsSum:[1000],
+    story: [{ item: 0, id: 0  }],
   };
 
   handleChange(e) {
@@ -31,15 +31,25 @@ class Index extends Component {
       });
     } else if (this.state.savings === "" && this.state.overdraft === "") {
      await this.setState({ error: " you didnt write input value " });
-    } else {
-      this.setState({ error: "" });
-      this.state.story.push({
-        item: this.state.overdraft,
-        id: Math.random() * 1000,
-      });
-      let num = this.state.story.reduce((sum, caunt) => sum + caunt.item, 0);
+    } else  if(this.state.overdraft > 0){
+        this.state.story.push({
+          item: this.state.overdraft,
+          id: Math.random() * 1000,
+        });
+        this.setState({ error: "" });     
+      let num = this.state.story.reduce((sum, caunt) => Number(sum) + Number(caunt.item), 0);
       this.setState({ sum: num });
+   
     }
+    this.state.savingsSum.push(this.state.savings)
+    let savingsNum =  this.state.savingsSum.reduce((acc,col)=>acc + Number(col))
+    setInterval(()=>{
+      if(this.state.mySaving < savingsNum){
+        this.setState({mySaving:this.state.mySaving + 1})
+      }
+    })
+  
+    
   };
 
   onclickDilete = (id) => {
@@ -51,18 +61,11 @@ class Index extends Component {
 
   hendleSubmit = (e) => {
     e.preventDefault();
-    if (this.state.error === '') {
-      this.setState({
-        overdraftSum: this.state.overdraftSum + Number(this.state.overdraft),
-      });
       this.setState({ savings: '', overdraft: '' });
-    }
-    
-    
   };
   render() {
     console.log(this.state);
-    return (
+     return (
       <div className="container">
         <div className="row mt-5">
           <div className="col-md-6 m-auto">
@@ -72,10 +75,11 @@ class Index extends Component {
               </h1>
               <form onSubmit={this.hendleSubmit}>
                 <div className="form-group">
-                  <label>your savings {this.state.mySaving}$ </label>
+                  <label className="alert alert-warning alert-dismissible fade show"
+                    role="alert">your savings {this.state.mySaving} $</label>
                   <br />
                   <br />
-                  <label htmlFor="name">will add your savings $ </label>
+                  <label htmlFor="name">will add your savings : $ </label>
                   <input
                     className="form-control"
                     type="number"
@@ -88,7 +92,7 @@ class Index extends Component {
                   <label className="textColor">{this.state.error}</label>
                   <br />
                   <br />
-                  <label>to take your overdraft $ </label>
+                  <label>to take your overdraft : $ </label>
                   <input
                     className="form-control"
                     type="number"
@@ -98,7 +102,7 @@ class Index extends Component {
                   />
                 </div>
                 <div className="form-group">
-                  <label> your overdraft : {this.state.overdraftSum}</label>
+                  <label> your overdraft : {this.state.sum} $</label>
                   <br />
                   <br />
                   <input
@@ -111,7 +115,9 @@ class Index extends Component {
                   <br />
                 </div>
               </form>
-              {this.state.story.map((item) => {
+              <div className = "hidOver">
+              {this.state.story.filter(item=>item.item !== 0)
+              .map((item) => {
                 return (
                   <div
                     className="alert alert-warning alert-dismissible fade show"
@@ -131,6 +137,7 @@ class Index extends Component {
                   </div>
                 );
               })}
+              </div>
             </div>
           </div>
         </div>
